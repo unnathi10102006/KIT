@@ -32,9 +32,25 @@
       <div class="actions">
         <a class="btn sm" href="tel:{{ c.phone }}">📞 Call</a>
         <a class="btn sm wa" href="https://wa.me/91{{ c.phone }}" target="_blank" rel="noopener">WhatsApp</a>
+        <button class="btn sm like-btn {{ 'liked' if c.id in likes }}" data-id="{{ c.id }}" onclick="toggleLike(this)">{{ '❤️' if c.id in likes else '🤍' }}</button>
+        <form method="post" action="{{ url_for('cart_add', crop_id=c.id) }}" style="margin:0;display:flex;gap:.3rem;align-items:center">
+          <input type="number" name="qty" value="1" min="1" max="{{ c.quantity|int }}" style="width:54px;padding:.3rem .4rem;font-size:.85rem">
+          <button class="btn sm" type="submit" style="background:#e65100">🛒 Add</button>
+        </form>
       </div>
     </div>
   </div>
 {% endfor %}
 </div>
 {% endblock %}
+<script>
+function toggleLike(btn) {
+  const id = btn.dataset.id;
+  fetch(`/like/${id}`, {method: 'POST'})
+    .then(r => r.json())
+    .then(d => {
+      btn.classList.toggle('liked', d.liked);
+      btn.textContent = d.liked ? '❤️' : '🤍';
+    });
+}
+</script>

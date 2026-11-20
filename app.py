@@ -423,6 +423,67 @@ def ask_llm(question, farmer, crops):
         return None
 
 
+# ================================================================ cart & likes
+@app.route("/cart/add/<int:crop_id>", methods=["POST"])
+def cart_add(crop_id):
+    crop = get_db().execute(
+        "SELECT c.*, f.name AS farmer_name, f.phone FROM crops c JOIN farmers f ON f.id=c.farmer_id WHERE c.id=? AND c.available=1",
+        (crop_id,)).fetchone()
+    if crop:
+        cart = session.get("cart", {})
+        key = str(crop_id)
+        qty = int(request.form.get("qty", 1))
+        if key in cart:
+            cart[key]["qty"] += qty
+        else:
+            cart[key] = {"id": crop_id, "name": crop["name"], "price": crop["price"],
+                         "unit": crop["unit"], "farmer": crop["farmer_name"],
+                         "phone": crop["phone"], "qty": qty}
+        session["cart"] = cart
+        flash(f"{crop['name']} added to cart! 🛒", "ok")
+    return redirect(request.referrer or url_for("index"))
+
+
+@app.route("/cart/remove/<int:crop_id>", methods=["POST"])
+def cart_remove(crop_id):
+    cart = session.get("cart", {})
+    cart.pop(str(crop_id), None)
+    session["cart"] = cart
+    return redirect(url_for("cart"))
+
+
+@app.route("/cart/clear", methods=["POST"])
+def cart_clear():
+    session["cart"] = {}
+    flash("Cart cleared.", "ok")
+    return redirect(url_for("cart"))
+
+
+@app.route("/cart")
+def cart():
+    cart = session.get("cart", {})
+    total = sum(v["price"] * v["qty"] for v in cart.values())
+    return render_template("cart.html", cart=cart, total=total)
+
+
+@app.route("/cart/checkout", methods=["POST"])
+def checkout():
+    session["cart"] = {}
+    flash("✅ Order placed! The farmer will contact you shortly.", "ok")
+    return redirect(url_for("index"))
+
+
+@app.route("/like/<int:crop_id>", methods=["POST"])
+def like_crop(crop_id):
+    likes = session.get("likes", [])
+    if crop_id in likes:
+        likes.remove(crop_id)
+    else:
+        likes.append(crop_id)
+    session["likes"] = likes
+    return jsonify({"liked": crop_id in likes, "count": likes.count(crop_id)})
+
+
 # ================================================================ public pages
 @app.route("/")
 def index():
@@ -434,7 +495,8 @@ def index():
            WHERE c.available = 1 AND (c.name LIKE ? OR f.village LIKE ?)
              AND (? = '' OR c.category = ?)
            ORDER BY c.updated DESC""", (f"%{q}%", f"%{q}%", category, category)).fetchall()
-    return render_template("index.html", crops=rows, q=q, category=category, categories=CATEGORIES)
+    return render_template("index.html", crops=rows, q=q, category=category, categories=CATEGORIES,
+                           likes=session.get("likes", []), cart=session.get("cart", {}))
 
 
 @app.route("/prices")

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}My Cart – Farmer Market{% endblock %}
+{% block content %}
+<h1>🛒 My Cart</h1>
+{% if not cart %}
+  <div class="panel" style="text-align:center;padding:2rem">
+    <p style="font-size:3rem">🛒</p>
+    <p class="muted">Your cart is empty.</p>
+    <a class="btn" href="{{ url_for('index') }}">Browse Crops</a>
+  </div>
+{% else %}
+<div class="panel">
+  <div class="tablewrap">
+    <table>
+      <tr><th>Crop</th><th>Farmer</th><th>Price</th><th>Qty</th><th>Subtotal</th><th></th></tr>
+      {% for key, item in cart.items() %}
+      <tr>
+        <td><b>{{ item.name }}</b></td>
+        <td>{{ item.farmer }}<br><span class="muted">📞 {{ item.phone }}</span></td>
+        <td>₹{{ '%g' % item.price }}/{{ item.unit }}</td>
+        <td>{{ item.qty }} {{ item.unit }}</td>
+        <td><b>₹{{ '%g' % (item.price * item.qty) }}</b></td>
+        <td>
+          <form method="post" action="{{ url_for('cart_remove', crop_id=item.id) }}">
+            <button class="btn sm red" type="submit">✕</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem;flex-wrap:wrap;gap:.8rem">
+    <div style="font-size:1.3rem;font-weight:800">Total: ₹{{ '%g' % total }}</div>
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+      <form method="post" action="{{ url_for('cart_clear') }}">
+        <button class="btn alt" type="submit">🗑 Clear Cart</button>
+      </form>
+      <form method="post" action="{{ url_for('checkout') }}">
+        <button class="btn" type="submit" style="background:#e65100;font-size:1rem;padding:.7rem 1.4rem">✅ Place Order</button>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="panel">
+  <h2>📞 Contact Farmers Directly</h2>
+  {% set seen = [] %}
+  {% for key, item in cart.items() %}
+    {% if item.phone not in seen %}
+      {% set _ = seen.append(item.phone) %}
+      <div class="lrow">
+        <div class="grow"><b>{{ item.farmer }}</b><br><span class="muted">{{ item.name }}</span></div>
+        <a class="btn sm" href="tel:{{ item.phone }}">📞 Call</a>
+        <a class="btn sm wa" href="https://wa.me/91{{ item.phone }}" target="_blank">WhatsApp</a>
+      </div>
+    {% endif %}
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

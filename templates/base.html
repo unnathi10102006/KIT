@@ -25,6 +25,10 @@
       <a href="{{ url_for('login') }}" class="{{ 'on' if ep == 'login' }}">Farmer Login</a>
       <a href="{{ url_for('register') }}" class="{{ 'on' if ep == 'register' }}">Register</a>
     {% endif %}
+    {% set cart_count = session.get('cart', {})|length %}
+    <a href="{{ url_for('cart') }}" class="cart-icon {{ 'on' if ep == 'cart' }}">
+      🛒 <span class="cart-badge {{ 'hidden' if cart_count == 0 }}">{{ cart_count }}</span>
+    </a>
   </nav>
 </header>
 <main>
