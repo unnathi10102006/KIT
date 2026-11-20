@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% from "_macros.html" import crop_img, market_badge %}
+{% block content %}
+<section class="hero">
+  <h1>Fresh from the farm, straight to you</h1>
+  <p>Find crops, prices and farmer contact details near you. No middlemen.</p>
+  <form class="search" method="get">
+    <input type="search" name="q" value="{{ q }}" placeholder="Search crop or village...">
+    <select name="category">
+      <option value="">All categories</option>
+      {% for c in categories %}<option value="{{ c }}" {{ 'selected' if c == category }}>{{ c }}</option>{% endfor %}
+    </select>
+    <button type="submit" style="background:#fff;color:#1b5e20">Search</button>
+  </form>
+</section>
+<div class="chips">
+  <a class="chip {{ 'on' if not category }}" href="{{ url_for('index') }}">All</a>
+  {% for c in categories %}<a class="chip {{ 'on' if c == category }}" href="{{ url_for('index', category=c) }}">{{ c }}</a>{% endfor %}
+</div>
+{% if not crops %}<p class="muted">No crops found. Try a different search.</p>{% endif %}
+<div class="grid">
+{% for c in crops %}
+  <div class="card">
+    {{ crop_img(c) }}
+    <div class="body">
+      <div><span class="tag">{{ c.category }}</span> {{ market_badge(c) }}</div>
+      <h3>{{ c.name }}</h3>
+      <div class="price">₹{{ '%g' % c.price }} <small>/ {{ c.unit }}</small></div>
+      <div class="muted">Available: {{ '%g' % c.quantity }} {{ c.unit }}</div>
+      <p style="margin:.4rem 0 0"><a href="{{ url_for('farmer', farmer_id=c.fid) }}"><b>{{ c.farmer_name }}</b></a><br>
+         <span class="muted">📍 {{ c.village }}</span></p>
+      <div class="actions">
+        <a class="btn sm" href="tel:{{ c.phone }}">📞 Call</a>
+        <a class="btn sm wa" href="https://wa.me/91{{ c.phone }}" target="_blank" rel="noopener">WhatsApp</a>
+      </div>
+    </div>
+  </div>
+{% endfor %}
+</div>
+{% endblock %}

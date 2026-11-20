@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>👋 Hello, {{ f.name }}</h1>
+<p class="muted">{{ now }} · 📍 {{ f.village }}</p>
+<div class="stats">
+  <div class="stat"><div class="n">{{ total }}</div><div class="l">Crops listed</div></div>
+  <div class="stat"><div class="n">{{ live }}</div><div class="l">Visible to buyers</div></div>
+  <div class="stat"><div class="n">₹{{ '{:,.0f}'.format(stock_value) }}</div><div class="l">Stock value</div></div>
+  <div class="stat"><div class="n">{{ buyers|length }}</div><div class="l">Buyers within 50 km</div></div>
+</div>
+<div class="panel"><h2>💡 Today's tip</h2><div class="tip">{{ tip }}</div>
+  <p><a class="btn sm" href="{{ url_for('advisor') }}">Ask the AI Advisor</a></p></div>
+<div class="two">
+  <div class="panel"><h2>Stock value by crop</h2>
+    {% for x in chart %}
+    <div class="bar"><span class="nm">{{ x.name }}</span><div class="track"><div class="fill" style="width:{{ x.pct }}%"></div></div><span class="v">₹{{ '{:,.0f}'.format(x.value) }}</span></div>
+    {% else %}<p class="muted">Add crops to see your chart.</p>{% endfor %}
+  </div>
+  <div class="panel"><h2>Market now <a class="muted" href="{{ url_for('prices') }}" style="font-size:.85rem">(see all)</a></h2>
+    {% for p in snap %}
+    <div class="lrow"><span style="font-size:1.6rem">{{ p.icon }}</span><span class="grow"><b>{{ p.name }}</b></span>
+      <span>₹{{ '%g' % p.price }}/{{ p.unit }}</span>
+      <span class="{{ p.trend }}">{{ '▲' if p.trend == 'up' else '▼' if p.trend == 'down' else '–' }} {{ '%g' % (p.change|abs) }}%</span></div>
+    {% endfor %}
+  </div>
+</div>
+<div class="panel"><h2>Your prices vs market</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Crop</th><th>Your price</th><th>Market</th><th>Status</th></tr>
+    {% for r in rows %}{% set c = r.crop %}
+    <tr><td>{{ c.name|crop_icon(c.category) }} {{ c.name }}</td><td>₹{{ '%g' % c.price }}/{{ c.unit }}</td>
+      <td>{% if r.cmp %}₹{{ '%g' % r.cmp.market }}/{{ c.unit }}{% else %}–{% endif %}</td>
+      <td>{% if r.cmp %}<span class="badge {{ r.cmp.cls }}">{{ r.cmp.label }}</span>{% else %}<span class="muted">no market data</span>{% endif %}</td></tr>
+    {% else %}<tr><td colspan="4" class="muted">No crops yet.</td></tr>{% endfor %}
+  </table></div></div>
+<div class="panel"><h2>📍 Closest buyers</h2>
+  {% for b in buyers[:3] %}
+  <div class="lrow"><div class="grow"><b>{{ b.name }}</b><br><span class="muted">{{ b.kind }} · {{ b.town }} · {{ b.distance }} km</span></div>
+    <a class="btn sm" href="tel:{{ b.phone }}">📞</a></div>
+  {% else %}<p class="muted">No buyers within 50 km yet.</p>{% endfor %}
+  <p><a class="btn sm alt" href="{{ url_for('buyers') }}">See all nearby buyers</a></p></div>
+{% endblock %}

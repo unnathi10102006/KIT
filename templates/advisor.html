@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>🤖 AI Advisor</h1>
+<p class="muted">Ask about selling prices, nearby buyers, watering, pests, fertilizer, storage and sowing season.
+  {% if ai_on %}<b>Claude AI is connected.</b>{% else %}Running in built-in mode (no internet or API key needed).{% endif %}</p>
+<div class="chat">
+  <div id="log"><div class="msg bot">Hello {{ session.farmer_name }}! I'm your farming advisor. What would you like to know?</div></div>
+  <div class="chips">{% for c in chips %}<span class="chip" onclick='send({{ c|tojson }})'>{{ c }}</span>{% endfor %}</div>
+  <div class="ask"><input id="q" placeholder="Type your question..." maxlength="500"><button id="go" type="button">Send</button></div>
+</div>
+<script>
+const log = document.getElementById('log'), q = document.getElementById('q');
+function add(text, cls){ const d = document.createElement('div'); d.className = 'msg ' + cls; d.textContent = text; log.appendChild(d); log.scrollTop = log.scrollHeight; return d; }
+async function send(text){
+  text = (text || q.value).trim(); if(!text) return;
+  add(text, 'me'); q.value = ''; const wait = add('Thinking...', 'bot');
+  try{
+    const r = await fetch('/api/advisor', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({question:text})});
+    const j = await r.json(); wait.textContent = j.reply || j.error || 'No answer.';
+  }catch(e){ wait.textContent = 'Could not reach the server.'; }
+  log.scrollTop = log.scrollHeight;
+}
+document.getElementById('go').onclick = () => send();
+q.addEventListener('keydown', e => { if(e.key === 'Enter') send(); });
+</script>
+{% endblock %}

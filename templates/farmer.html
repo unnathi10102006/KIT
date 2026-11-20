@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% from "_macros.html" import crop_img, market_badge %}
+{% block content %}
+<div class="panel">
+  <h1>🧑‍🌾 {{ f.name }}</h1>
+  <p>📍 {{ f.village }} · 📞 <a href="tel:{{ f.phone }}">{{ f.phone }}</a></p>
+  <div class="actions">
+    <a class="btn" href="tel:{{ f.phone }}">📞 Call</a>
+    <a class="btn wa" href="https://wa.me/91{{ f.phone }}" target="_blank" rel="noopener">WhatsApp</a>
+  </div>
+</div>
+<h2>Available crops</h2>
+<div class="grid">
+{% for c in crops %}
+  <div class="card">{{ crop_img(c) }}
+    <div class="body"><div><span class="tag">{{ c.category }}</span> {{ market_badge(c) }}</div>
+      <h3>{{ c.name }}</h3>
+      <div class="price">₹{{ '%g' % c.price }} <small>/ {{ c.unit }}</small></div>
+      <div class="muted">Available: {{ '%g' % c.quantity }} {{ c.unit }}</div></div>
+  </div>
+{% else %}<p class="muted">No crops listed right now.</p>{% endfor %}
+</div>
+{% endblock %}

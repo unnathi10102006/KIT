@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>📍 Nearby Buyers</h1>
+<p class="muted">Distances are measured from {{ f.village }} (approximate, in a straight line).</p>
+<form class="search" method="get" style="margin-bottom:1rem">
+  <select name="radius">
+    {% for r in [10,25,50,100,0] %}<option value="{{ r }}" {{ 'selected' if r == radius }}>{{ ('Within ' ~ r ~ ' km') if r else 'Any distance' }}</option>{% endfor %}
+  </select>
+  <select name="crop"><option value="">Any crop</option>
+    {% for n in crop_names %}<option {{ 'selected' if n == crop }}>{{ n }}</option>{% endfor %}</select>
+  <button type="submit">Find buyers</button>
+</form>
+<div class="grid">
+{% for b in buyers %}
+  <div class="card"><div class="body">
+    <div><span class="tag">{{ b.kind }}</span> <span class="badge fair">{{ b.distance }} km</span></div>
+    <h3>{{ b.name }}</h3>
+    <div class="muted">📍 {{ b.town }}</div>
+    <div style="margin:.4rem 0">Buys:
+      {% for x in b.buys_list %}<span class="tag {{ '' if x.lower() in my_crops else 'off' }}">{{ x }}</span> {% endfor %}</div>
+    <div class="actions">
+      <a class="btn sm" href="tel:{{ b.phone }}">📞 Call</a>
+      <a class="btn sm wa" href="https://wa.me/91{{ b.phone }}" target="_blank" rel="noopener">WhatsApp</a>
+    </div>
+  </div></div>
+{% else %}<p class="muted">No buyers found. Try a bigger distance.</p>{% endfor %}
+</div>
+<p class="muted">Green tags are crops you grow. Buyer names and numbers above are demo data.</p>
+<details class="panel" style="margin-top:1rem"><summary>➕ Add a buyer you know</summary>
+<form class="stack" method="post" action="{{ url_for('add_buyer') }}" style="box-shadow:none;padding:.6rem 0">
+  <label>Buyer / shop name <input name="name" required></label>
+  <label>Type <select name="kind">{% for k in kinds %}<option>{{ k }}</option>{% endfor %}</select></label>
+  <label>Town <select name="town">{% for t in towns %}<option>{{ t }}</option>{% endfor %}</select></label>
+  <label>Phone (10 digits) <input name="phone" type="tel" pattern="[0-9]{10}" required></label>
+  <label>Crops they buy (comma separated) <input name="buys" placeholder="Tomato, Onion" required></label>
+  <button type="submit">Save buyer</button>
+</form></details>
+{% endblock %}

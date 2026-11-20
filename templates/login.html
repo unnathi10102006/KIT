@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Farmer Login</h1>
+<form class="stack" method="post">
+  <label>Phone <input name="phone" type="tel" inputmode="numeric" required></label>
+  <label>Password <input name="password" type="password" required></label>
+  <button type="submit">Login</button>
+  <span class="muted">New farmer? <a href="{{ url_for('register') }}">Register here</a><br>Demo: 9999999999 / demo123</span>
+</form>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<h1><span class="pulse"></span>Live market prices</h1>
+<p class="muted">Demo prices that move every 5 minutes. Last update: <b id="stamp">{{ stamp }}</b>. Refreshes automatically every 30 seconds.
+Always confirm real mandi rates before a big sale.</p>
+<div class="search" style="margin-bottom:1rem"><input id="filter" type="search" placeholder="Filter crops..."></div>
+<div class="tablewrap"><table>
+  <thead><tr><th>Crop</th><th>Category</th><th>Price</th><th>Change</th></tr></thead>
+  <tbody id="pbody"></tbody>
+</table></div>
+<script>
+let DATA = {{ prices|tojson }};
+const body = document.getElementById('pbody'), filt = document.getElementById('filter');
+function render(){
+  const f = filt.value.toLowerCase();
+  body.innerHTML = DATA.filter(p => p.name.toLowerCase().includes(f)).map(p =>
+    `<tr><td style="font-size:1.05rem">${p.icon} <b>${p.name}</b></td><td>${p.category}</td>
+     <td><b>₹${p.price.toFixed(2)}</b> / ${p.unit}</td>
+     <td class="${p.trend}">${p.trend==='up'?'▲':p.trend==='down'?'▼':'–'} ${Math.abs(p.change).toFixed(2)}%</td></tr>`).join('');
+}
+async function refresh(){
+  try{ const r = await fetch('/api/prices'); const j = await r.json();
+       DATA = j.prices; document.getElementById('stamp').textContent = j.stamp; render(); }catch(e){}
+}
+filt.addEventListener('input', render); render(); setInterval(refresh, 30000);
+</script>
+{% endblock %}

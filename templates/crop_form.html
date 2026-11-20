@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ 'Edit crop' if crop else 'Add crop' }}</h1>
+<form class="stack" method="post" enctype="multipart/form-data">
+  <label>Crop name <input name="name" list="cropnames" value="{{ crop.name if crop else '' }}" required></label>
+  <datalist id="cropnames">
+    {% for n in ['Tomato','Onion','Potato','Carrot','Cabbage','Brinjal','Chilli','Garlic','Banana','Mango','Grapes','Orange','Watermelon','Coconut','Groundnut','Toor Dal','Ragi','Maize','Rice','Milk','Turmeric'] %}<option value="{{ n }}">{% endfor %}
+  </datalist>
+  <label>Category
+    <select name="category">{% for c in categories %}<option {{ 'selected' if crop and crop.category == c }}>{{ c }}</option>{% endfor %}</select></label>
+  <label>Price (₹) <input name="price" type="number" step="0.01" min="0" value="{{ crop.price if crop else '' }}" required></label>
+  <label>Unit
+    <select name="unit">{% for u in units %}<option {{ 'selected' if crop and crop.unit == u }}>{{ u }}</option>{% endfor %}</select></label>
+  <label>Quantity available <input name="quantity" type="number" step="0.01" min="0" value="{{ crop.quantity if crop else '' }}" required></label>
+  <label>Photo (optional, PNG/JPG/WEBP, max 4 MB) <input name="photo" type="file" accept="image/png,image/jpeg,image/webp"></label>
+  {% if crop and crop.image %}
+    <img src="{{ url_for('static', filename='uploads/' ~ crop.image) }}" alt="" style="max-width:200px;border-radius:12px">
+    <label style="flex-direction:row;gap:.5rem;font-weight:400"><input type="checkbox" name="remove_photo" style="width:auto"> Remove current photo</label>
+  {% endif %}
+  <p class="muted">No photo? A colourful crop picture is shown automatically.</p>
+  <button type="submit">Save</button>
+  <a class="btn alt" href="{{ url_for('my_crops') }}">Cancel</a>
+</form>
+{% endblock %}

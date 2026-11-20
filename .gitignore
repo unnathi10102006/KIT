@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.pyo
+market.db
+static/uploads/*
+!static/uploads/.gitkeep
+.env

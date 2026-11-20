@@ -1,0 +1,10 @@
+{% macro crop_img(c, small=false) %}
+<div class="crop-img cat-{{ c.category|lower }} {{ 'sm' if small }}">
+  {% if c.image %}<img src="{{ url_for('static', filename='uploads/' ~ c.image) }}" alt="{{ c.name }}">
+  {% else %}<span>{{ c.name|crop_icon(c.category) }}</span>{% endif %}
+</div>
+{% endmacro %}
+{% macro market_badge(c) %}
+{% set m = compare(c.name, c.price, c.unit) %}
+{% if m %}<span class="badge {{ m.cls }}" title="Market about ₹{{ '%g' % m.market }}/{{ c.unit }}">{{ m.label }}</span>{% endif %}
+{% endmacro %}
