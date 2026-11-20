@@ -4,5 +4,5 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt gunicorn
 COPY . .
 ENV SECRET_KEY=change-this-in-production
-EXPOSE 8080
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "app:app"]
+EXPOSE 10000
+CMD ["gunicorn", "--bind", "0.0.0.0:10000", "app:app"]

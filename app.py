@@ -740,8 +740,11 @@ def local_ip():
         return "127.0.0.1"
 
 
-if __name__ == "__main__":
+# Initialize DB on startup (works both for direct run and gunicorn)
+with app.app_context():
     init_db()
+
+if __name__ == "__main__":
     port = 5000
     print("\n==============================================")
     print(" Farmer Market v2 is running!")
